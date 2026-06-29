@@ -1,1 +1,236 @@
-/* You can add global styles to this file, and also import other style files */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-base:        #121212;
+  --bg-surface:     #181818;
+  --bg-elevated:    #282828;
+  --bg-input:       #121212;
+  --border:         #3e3e3e;
+  --border-focus:   #6c63ff;
+  --accent:         #6c63ff;
+  --accent-hover:   #8b84ff;
+  --accent-dim:     rgba(108, 99, 255, 0.15);
+  --text-primary:   #ffffff;
+  --text-secondary: #b3b3b3;
+  --text-dim:       #535353;
+  --danger:         #ff5370;
+  --danger-dim:     rgba(255, 83, 112, 0.15);
+  --success:        #00c896;
+  --radius-sm:      6px;
+  --radius-md:      10px;
+  --radius-lg:      16px;
+  --shadow-float:   0 16px 48px rgba(0, 0, 0, 0.85), 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+/* Shared button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  white-space: nowrap;
+  font-family: inherit;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+
+  &:hover:not(:disabled) { background: var(--accent-hover); }
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+
+  &:hover:not(:disabled) {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border-color: var(--border-focus);
+  }
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid transparent;
+
+  &:hover:not(:disabled) {
+    background: var(--danger-dim);
+    border-color: var(--danger);
+  }
+}
+
+.btn-icon {
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover { background: var(--bg-elevated); color: var(--text-primary); }
+  &.danger:hover { background: var(--danger-dim); color: var(--danger); }
+}
+
+/* Input fields */
+.input {
+  width: 100%;
+  padding: 7px 12px;
+  background: #282828;
+  border: 1px solid #3e3e3e;
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+
+  &::placeholder { color: var(--text-dim); }
+  &:focus { border-color: var(--accent); }
+}
+
+select.input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b90a0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+/* Tag chip */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  background: #282828;
+  color: #b3b3b3;
+  border-radius: 3px;
+  border: 1px solid #3e3e3e;
+  font-size: 10px;
+  font-weight: 500;
+
+  button {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.7;
+    font-size: 12px;
+
+    &:hover { opacity: 1; }
+  }
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(2px);
+}
+
+.modal {
+  background: #181818;
+  border: 1px solid #3e3e3e;
+  border-radius: 10px;
+  width: 500px;
+  max-width: 90vw;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.85), 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid #3e3e3e;
+
+  h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px 16px;
+  border-top: 1px solid #3e3e3e;
+}
+
+/* Form field */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .field-error {
+    font-size: 11px;
+    color: var(--danger);
+    margin-top: 2px;
+  }
+}

@@ -3,6 +3,21 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "type": "shell",
+      "label": "tauri dev",
+      "command": "npm run tauri:dev",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "tauri",
+        "pattern": { "regexp": "." },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": { "regexp": "Building" },
+          "endsPattern": { "regexp": "Running" }
+        }
+      }
+    },
+    {
       "type": "npm",
       "script": "start",
       "isBackground": true,

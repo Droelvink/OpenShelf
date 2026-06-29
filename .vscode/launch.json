@@ -3,6 +3,15 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Tauri Dev",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/@tauri-apps/cli/dist-js/cli.js",
+      "args": ["dev"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
       "name": "ng serve",
       "type": "chrome",
       "request": "launch",
