@@ -50,4 +50,3 @@ jobs:
           releaseBody: See the assets below to download this version.
           releaseDraft: true
           prerelease: false
-          updaterJsonArtifactName: latest.json
