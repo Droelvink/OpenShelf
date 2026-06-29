@@ -30,7 +30,7 @@ pub struct AppPreferences {
 impl Default for AppPreferences {
     fn default() -> Self {
         Self {
-            hotkey: "ctrl+k".to_string(),
+            hotkey: "alt+space".to_string(),
             autostart: false,
             start_minimized: false,
             is_dev: false,

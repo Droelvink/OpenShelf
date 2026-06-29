@@ -1,6 +1,8 @@
 import { Component, computed, inject, output, signal } from '@angular/core';
 import { PreferencesService } from '../../shared/services/preferences.service';
 
+const DEFAULT_HOTKEY = 'alt+space';
+
 @Component({
   selector: 'app-preferences',
   template: `
@@ -28,6 +30,7 @@ import { PreferencesService } from '../../shared/services/preferences.service';
                   <button class="btn btn-ghost btn-danger-text" (click)="cancelRecording()">Cancel</button>
                 } @else {
                   <button class="btn btn-ghost" (click)="startRecording()">Change</button>
+                  <button class="btn btn-ghost" [disabled]="isAtDefault()" (click)="resetToDefault()">Reset</button>
                 }
               </div>
               @if (recording()) {
@@ -223,6 +226,12 @@ export class PreferencesComponent {
   readonly saving = signal(false);
   readonly error = signal('');
 
+  readonly isAtDefault = computed(() => {
+    const pending = this.pendingHotkey();
+    const saved = this.prefsService.preferences().hotkey;
+    return (pending || saved) === DEFAULT_HOTKEY;
+  });
+
   readonly autostart = computed(() => this.prefsService.preferences().autostart);
   readonly startMinimized = computed(() => this.prefsService.preferences().startMinimized);
   readonly isDev = computed(() => this.prefsService.preferences().isDev);
@@ -241,6 +250,10 @@ export class PreferencesComponent {
   protected cancelRecording(): void {
     this.recording.set(false);
     this.liveInput.set('');
+  }
+
+  protected resetToDefault(): void {
+    this.pendingHotkey.set(DEFAULT_HOTKEY);
   }
 
   protected onKeyDown(event: KeyboardEvent): void {
