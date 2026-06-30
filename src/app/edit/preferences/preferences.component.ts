@@ -1,5 +1,6 @@
 import { Component, computed, inject, output, signal } from '@angular/core';
 import { PreferencesService } from '../../shared/services/preferences.service';
+import { UpdateService } from '../../shared/services/update.service';
 
 const DEFAULT_HOTKEY = 'alt+space';
 
@@ -72,6 +73,21 @@ const DEFAULT_HOTKEY = 'alt+space';
                 <div class="toggle" [class.on]="startMinimized()"></div>
               </button>
             }
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="section">
+            <p class="section-label">Updates</p>
+            <div class="update-row">
+              <button
+                class="btn btn-ghost"
+                [disabled]="checking()"
+                (click)="checkForUpdates()"
+              >
+                {{ checking() ? 'Checking…' : 'Check for Updates' }}
+              </button>
+            </div>
           </div>
 
           @if (error()) {
@@ -198,6 +214,8 @@ const DEFAULT_HOTKEY = 'alt+space';
       }
     }
 
+    .update-row { display: flex; align-items: center; }
+
     .btn-danger-text { color: var(--danger) !important; }
 
     .hint {
@@ -219,11 +237,13 @@ export class PreferencesComponent {
   readonly closed = output<void>();
 
   private readonly prefsService = inject(PreferencesService);
+  private readonly updateService = inject(UpdateService);
 
   readonly recording = signal(false);
   readonly pendingHotkey = signal('');
   readonly liveInput = signal('');
   readonly saving = signal(false);
+  readonly checking = signal(false);
   readonly error = signal('');
 
   readonly isAtDefault = computed(() => {
@@ -313,6 +333,12 @@ export class PreferencesComponent {
     } catch (err) {
       this.error.set(`Failed to update startup setting: ${err}`);
     }
+  }
+
+  protected async checkForUpdates(): Promise<void> {
+    this.checking.set(true);
+    await this.updateService.checkForUpdates(false);
+    this.checking.set(false);
   }
 
   protected async save(): Promise<void> {

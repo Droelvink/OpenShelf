@@ -10,6 +10,7 @@ import { PreferencesService } from '../shared/services/preferences.service';
 import { ShelfItem, ITEM_TYPE_LABELS, ITEM_TYPE_ABBR } from '../shared/models/shelf-item.model';
 import { ItemFormComponent } from './item-form/item-form.component';
 import { PreferencesComponent } from './preferences/preferences.component';
+import { UpdateService } from '../shared/services/update.service';
 
 @Component({
   selector: 'app-edit',
@@ -130,6 +131,23 @@ import { PreferencesComponent } from './preferences/preferences.component';
           </div>
         }
       </main>
+
+      <!-- Update notification bar -->
+      @if (updateService.pendingUpdate(); as update) {
+        <div class="update-bar" role="status">
+          <span>Version <strong>{{ update.version }}</strong> is available</span>
+          <div class="update-bar-actions">
+            <button class="btn btn-ghost" (click)="updateService.dismiss()">Dismiss</button>
+            <button
+              class="btn btn-primary"
+              [disabled]="updateService.installing()"
+              (click)="updateService.install()"
+            >
+              {{ updateService.installing() ? 'Installing…' : 'Install Update' }}
+            </button>
+          </div>
+        </div>
+      }
 
       <!-- Delete confirm bar -->
       @if (pendingDelete()) {
@@ -368,6 +386,24 @@ import { PreferencesComponent } from './preferences/preferences.component';
       flex-shrink: 0;
     }
 
+    /* Update notification bar */
+    .update-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: #1a2a1a;
+      border-top: 1px solid var(--accent);
+      font-size: 13px;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+
+    .update-bar-actions {
+      display: flex;
+      gap: 8px;
+    }
+
     /* Delete confirmation bar */
     .delete-bar {
       position: fixed;
@@ -396,6 +432,7 @@ import { PreferencesComponent } from './preferences/preferences.component';
 export class EditComponent {
   private readonly itemsService = inject(ItemsService);
   private readonly prefsService = inject(PreferencesService);
+  protected readonly updateService = inject(UpdateService);
   protected readonly icons = this.itemsService.icons;
 
   readonly loading = signal(true);
