@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "OpenShelf",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "identifier": "com.openshelf.app",
   "build": {
     "frontendDist": "../dist/OpenShelf/browser",
@@ -29,7 +29,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDVEQTBEOTk4OTkyOEE4MjgKUldRb3FDaVptTm1nWFdvSHU4VkhOaUVPT05ESXpGWm4rQUZMTjIzTTJJOUlRbW1DbHJXRkpiMTkK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDI3MkVDQjUwOTJENjYxQjEKUldTeFlkYVNVTXN1SjVYRWFqclhyRzhCK1NKa1dBMlJ1WElJUFl6RUU0WHJzVjFYL1pmZGl0N3AK",
       "endpoints": [
         "https://github.com/Droelvink/OpenShelf/releases/latest/download/latest.json"
       ]
