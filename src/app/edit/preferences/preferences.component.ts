@@ -78,7 +78,10 @@ const DEFAULT_HOTKEY = 'alt+space';
           <div class="divider"></div>
 
           <div class="section">
-            <p class="section-label">Updates</p>
+            <p class="section-label">Version</p>
+            @if (updateService.currentVersion(); as version) {
+              <p class="current-version">Current version: <strong>{{ version }}</strong></p>
+            }
             <div class="update-row">
               <button
                 class="btn btn-ghost"
@@ -87,6 +90,14 @@ const DEFAULT_HOTKEY = 'alt+space';
               >
                 {{ checking() ? 'Checking…' : 'Check for Updates' }}
               </button>
+              @if (updateMsg()) {
+                <span class="update-msg" [class.update-msg--error]="updateMsg() === 'Could not check for updates'">
+                  {{ updateMsg() }}
+                  @if (updateFound()) {
+                    <button class="btn-link" (click)="updateService.openDownloadPage()">Download</button>
+                  }
+                </span>
+              }
             </div>
           </div>
 
@@ -214,7 +225,33 @@ const DEFAULT_HOTKEY = 'alt+space';
       }
     }
 
-    .update-row { display: flex; align-items: center; }
+    .current-version {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .update-row { display: flex; align-items: center; gap: 10px; }
+
+    .update-msg {
+      font-size: 12px;
+      color: var(--text-secondary);
+
+      &.update-msg--error { color: var(--danger); }
+    }
+
+    .btn-link {
+      background: none;
+      border: none;
+      padding: 0;
+      margin-left: 4px;
+      font-size: 12px;
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: underline;
+
+      &:hover { opacity: 0.8; }
+    }
 
     .btn-danger-text { color: var(--danger) !important; }
 
@@ -237,13 +274,15 @@ export class PreferencesComponent {
   readonly closed = output<void>();
 
   private readonly prefsService = inject(PreferencesService);
-  private readonly updateService = inject(UpdateService);
+  protected readonly updateService = inject(UpdateService);
 
   readonly recording = signal(false);
   readonly pendingHotkey = signal('');
   readonly liveInput = signal('');
   readonly saving = signal(false);
   readonly checking = signal(false);
+  readonly updateMsg = signal('');
+  readonly updateFound = signal(false);
   readonly error = signal('');
 
   readonly isAtDefault = computed(() => {
@@ -337,8 +376,21 @@ export class PreferencesComponent {
 
   protected async checkForUpdates(): Promise<void> {
     this.checking.set(true);
-    await this.updateService.checkForUpdates(false);
-    this.checking.set(false);
+    this.updateMsg.set('');
+    this.updateFound.set(false);
+    try {
+      const result = await this.updateService.checkForUpdates();
+      if (result.status === 'update-found') {
+        this.updateMsg.set(`Version ${result.version} is available.`);
+        this.updateFound.set(true);
+      } else if (result.status === 'up-to-date') {
+        this.updateMsg.set('You\'re up to date');
+      } else {
+        this.updateMsg.set('Could not check for updates');
+      }
+    } finally {
+      this.checking.set(false);
+    }
   }
 
   protected async save(): Promise<void> {

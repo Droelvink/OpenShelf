@@ -1,60 +1,61 @@
 import { Injectable, signal } from '@angular/core';
 
-export interface PendingUpdate {
-  version: string;
-  body: string | null;
-}
+const DISMISSED_KEY = 'dismissed_update_version';
+
+export type UpdateCheckResult =
+  | { status: 'update-found'; version: string }
+  | { status: 'up-to-date' }
+  | { status: 'error' };
 
 @Injectable({ providedIn: 'root' })
 export class UpdateService {
-  private tauriUpdate: { downloadAndInstall(): Promise<void> } | null = null;
+  readonly pendingUpdate = signal<string | null>(null);
+  readonly currentVersion = signal<string | null>(null);
 
-  readonly pendingUpdate = signal<PendingUpdate | null>(null);
-  readonly installing = signal(false);
-
-  async checkForUpdates(silent = true): Promise<void> {
+  async checkForUpdates(): Promise<UpdateCheckResult> {
     try {
-      const { check } = await import('@tauri-apps/plugin-updater');
-      const update = await check();
+      const { getVersion } = await import('@tauri-apps/api/app');
+      const current = await getVersion();
+      this.currentVersion.set(current);
 
-      if (!update) {
-        if (!silent) {
-          const { message } = await import('@tauri-apps/plugin-dialog');
-          await message("You're already on the latest version.", {
-            title: 'No Updates Available',
-            kind: 'info',
-          });
+      const response = await fetch('https://api.github.com/repos/Droelvink/OpenShelf/releases/latest');
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const data = await response.json();
+      const latest = (data.tag_name as string).replace(/^v/, '');
+
+      if (isNewerVersion(latest, current)) {
+        const dismissed = localStorage.getItem(DISMISSED_KEY);
+        if (dismissed !== latest) {
+          this.pendingUpdate.set(latest);
         }
-        return;
+        return { status: 'update-found', version: latest };
       }
-
-      this.tauriUpdate = update;
-      this.pendingUpdate.set({ version: update.version, body: update.body ?? null });
+      return { status: 'up-to-date' };
     } catch {
-      if (!silent) {
-        const { message } = await import('@tauri-apps/plugin-dialog');
-        await message('Could not check for updates. Check your connection and try again.', {
-          title: 'Update Check Failed',
-          kind: 'error',
-        });
-      }
+      return { status: 'error' };
     }
+  }
+
+  async openDownloadPage(): Promise<void> {
+    const { invoke } = await import('@tauri-apps/api/core');
+    await invoke('open_url', { url: 'https://github.com/Droelvink/OpenShelf/releases/latest' });
   }
 
   dismiss(): void {
-    this.tauriUpdate = null;
+    const version = this.pendingUpdate();
+    if (version) {
+      localStorage.setItem(DISMISSED_KEY, version);
+    }
     this.pendingUpdate.set(null);
   }
+}
 
-  async install(): Promise<void> {
-    if (!this.tauriUpdate) return;
-    this.installing.set(true);
-    try {
-      await this.tauriUpdate.downloadAndInstall();
-      const { relaunch } = await import('@tauri-apps/plugin-process');
-      await relaunch();
-    } catch {
-      this.installing.set(false);
-    }
-  }
+function isNewerVersion(latest: string, current: string): boolean {
+  const parse = (v: string) => v.split('.').map(Number);
+  const [la, lb, lc] = parse(latest);
+  const [ca, cb, cc] = parse(current);
+  if (la !== ca) return la > ca;
+  if (lb !== cb) return lb > cb;
+  return lc > cc;
 }

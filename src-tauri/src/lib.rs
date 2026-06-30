@@ -22,8 +22,6 @@ pub fn run() {
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             Some(vec!["--minimized"]),
         ))
-        .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             if let Some(w) = app.get_webview_window("main") {
                 let _ = w.show();
@@ -42,6 +40,7 @@ pub fn run() {
             commands::set_autostart,
             commands::pick_file,
             commands::pick_folder,
+            commands::open_url,
             commands::hide_search_window,
             commands::show_main_window,
             commands::get_icon,

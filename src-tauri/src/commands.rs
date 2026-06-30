@@ -342,6 +342,12 @@ pub fn set_autostart(
 }
 
 #[tauri::command]
+pub fn open_url(app: AppHandle, url: String) -> Result<(), String> {
+    use tauri_plugin_opener::OpenerExt;
+    app.opener().open_url(&url, None::<&str>).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub fn hide_search_window(app: AppHandle) {
     if let Some(window) = app.get_webview_window("search") {
         let _ = window.hide();

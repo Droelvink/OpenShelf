@@ -167,18 +167,12 @@ import { UpdateService } from '../shared/services/update.service';
       </footer>
 
       <!-- Update notification bar -->
-      @if (updateService.pendingUpdate(); as update) {
+      @if (updateService.pendingUpdate(); as version) {
         <div class="update-bar" role="status">
-          <span>Version <strong>{{ update.version }}</strong> is available</span>
+          <span>Version <strong>{{ version }}</strong> is available</span>
           <div class="update-bar-actions">
             <button class="btn btn-ghost" (click)="updateService.dismiss()">Dismiss</button>
-            <button
-              class="btn btn-primary"
-              [disabled]="updateService.installing()"
-              (click)="updateService.install()"
-            >
-              {{ updateService.installing() ? 'Installing…' : 'Install Update' }}
-            </button>
+            <button class="btn btn-primary" (click)="updateService.openDownloadPage()">Download</button>
           </div>
         </div>
       }
@@ -441,10 +435,9 @@ import { UpdateService } from '../shared/services/update.service';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 16px;
-      background: #1a2a1a;
-      border-top: 1px solid var(--accent);
-      font-size: 13px;
+      padding: 5px 12px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
       color: var(--text-primary);
       flex-shrink: 0;
     }
