@@ -9,6 +9,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { ItemsService } from '../shared/services/items.service';
 import { PreferencesService } from '../shared/services/preferences.service';
 import { ShelfItem, ITEM_TYPE_LABELS, ITEM_TYPE_ABBR } from '../shared/models/shelf-item.model';
+import { fuzzyScore } from '../shared/utils/fuzzy';
 import { ItemFormComponent } from './item-form/item-form.component';
 import { PreferencesComponent } from './preferences/preferences.component';
 import { UpdateService } from '../shared/services/update.service';
@@ -524,12 +525,19 @@ export class EditComponent {
   readonly isMaximized = signal(false);
 
   readonly filteredItems = computed(() => {
-    const q = this.filterQuery().toLowerCase();
+    const q = this.filterQuery().toLowerCase().trim();
     if (!q) return this.itemsService.items();
-    return this.itemsService.items().filter(item =>
-      item.name.toLowerCase().includes(q) ||
-      item.tags.some(tag => tag.toLowerCase().includes(q))
-    );
+
+    const scored: Array<{ item: ShelfItem; score: number }> = [];
+
+    for (const item of this.itemsService.items()) {
+      const nameScore = fuzzyScore(item.name.toLowerCase(), q);
+      const tagScore = item.tags.reduce((best, t) => Math.max(best, fuzzyScore(t.toLowerCase(), q)), -1);
+      const score = Math.max(nameScore, tagScore);
+      if (score >= 0) scored.push({ item, score });
+    }
+
+    return scored.sort((a, b) => b.score - a.score).map(s => s.item);
   });
 
   constructor() {

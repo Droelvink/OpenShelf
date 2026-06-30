@@ -12,6 +12,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWindow, LogicalSize } from '@tauri-apps/api/window';
 import { ItemsService } from '../shared/services/items.service';
 import { ShelfItem, ITEM_TYPE_LABELS, itemTypeColor } from '../shared/models/shelf-item.model';
+import { fuzzyScore } from '../shared/utils/fuzzy';
 
 const SEARCH_BAR_H = 58;
 const RESULT_ROW_H = 52;
@@ -389,21 +390,19 @@ export class SearchComponent {
     const q = this.query().toLowerCase().trim();
     if (!q) return [] as ShelfItem[];
 
-    const exact: ShelfItem[] = [];
-    const partial: ShelfItem[] = [];
+    const scored: Array<{ item: ShelfItem; score: number }> = [];
 
     for (const item of this.itemsSvc.items()) {
-      const nameMatch = item.name.toLowerCase();
-      const tagMatch = item.tags.map(t => t.toLowerCase());
-
-      if (nameMatch === q || tagMatch.includes(q)) {
-        exact.push(item);
-      } else if (nameMatch.includes(q) || tagMatch.some(t => t.includes(q))) {
-        partial.push(item);
-      }
+      const nameScore = fuzzyScore(item.name.toLowerCase(), q);
+      const tagScore = item.tags.reduce((best, t) => Math.max(best, fuzzyScore(t.toLowerCase(), q)), -1);
+      const score = Math.max(nameScore, tagScore);
+      if (score >= 0) scored.push({ item, score });
     }
 
-    return [...exact, ...partial].slice(0, 8);
+    return scored
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8)
+      .map(s => s.item);
   });
 
   constructor() {

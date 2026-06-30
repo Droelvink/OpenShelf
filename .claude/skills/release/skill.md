@@ -5,7 +5,7 @@ description: Bump version and publish a new release. Only invoke when the user e
 
 ## Instructions
 
-Ask the user which version bump to apply — **minor** or **major** — using AskUserQuestion before doing anything else.
+Ask the user which version bump to apply — **patch**, **minor**, or **major** — using AskUserQuestion before doing anything else.
 
 Then execute these steps in order:
 
@@ -15,6 +15,7 @@ Read `src-tauri/tauri.conf.json` and extract the current `version` field (semver
 
 ### 2. Compute new version
 
+- **patch**: increment the patch number (e.g. `1.0.0` → `1.0.1`)
 - **minor**: increment the middle number, reset patch to 0 (e.g. `1.0.0` → `1.1.0`)
 - **major**: increment the first number, reset minor and patch to 0 (e.g. `1.0.0` → `2.0.0`)
 
