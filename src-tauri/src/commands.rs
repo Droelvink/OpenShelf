@@ -145,6 +145,19 @@ pub fn open_item(app: AppHandle, id: String) -> Result<(), String> {
             .opener()
             .open_url(&item.path, None::<&str>)
             .map_err(|e| e.to_string()),
+        "run" => {
+            let commands: String = item
+                .path
+                .lines()
+                .filter(|l| !l.trim().is_empty())
+                .collect::<Vec<_>>()
+                .join(" & ");
+            std::process::Command::new("cmd")
+                .args(["/c", "start", "cmd", "/k", &commands])
+                .spawn()
+                .map_err(|e| e.to_string())?;
+            Ok(())
+        }
         _ => app
             .opener()
             .open_path(&item.path, None::<&str>)

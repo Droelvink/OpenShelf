@@ -109,6 +109,10 @@ html, body {
 
   &:hover { background: var(--bg-elevated); color: var(--text-primary); }
   &.danger:hover { background: var(--danger-dim); color: var(--danger); }
+  &.btn-icon-accent { color: var(--accent); }
+  &.btn-icon-accent:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
+  &.btn-icon-primary { background: var(--accent); color: #fff; }
+  &.btn-icon-primary:hover { background: var(--accent-hover); color: #fff; }
 }
 
 /* Input fields */

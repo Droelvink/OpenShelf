@@ -5,6 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { ItemsService } from '../shared/services/items.service';
 import { PreferencesService } from '../shared/services/preferences.service';
 import { ShelfItem, ITEM_TYPE_LABELS, ITEM_TYPE_ABBR } from '../shared/models/shelf-item.model';
@@ -17,38 +18,44 @@ import { UpdateService } from '../shared/services/update.service';
   imports: [ItemFormComponent, PreferencesComponent],
   template: `
     <div class="edit-root">
-      <!-- Header -->
-      <header class="topbar">
-        <div class="topbar-brand">
+      <!-- Header / custom title bar -->
+      <header class="topbar" data-tauri-drag-region>
+        <div class="topbar-brand" data-tauri-drag-region>
           <span class="brand-icon">◧</span>
           <span class="brand-name">OpenShelf</span>
         </div>
         <div class="topbar-actions">
-          <div class="search-wrap">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input
-              class="filter-input"
-              type="text"
-              placeholder="Filter items…"
-              [value]="filterQuery()"
-              (input)="filterQuery.set($any($event.target).value)"
-              aria-label="Filter items"
-            />
-          </div>
-          <button class="btn btn-ghost" (click)="showPrefs.set(true)" aria-label="Preferences">
+          <button class="btn-icon" (click)="showPrefs.set(true)" aria-label="Settings">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
               <circle cx="12" cy="12" r="3"/>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
             </svg>
-            Settings
           </button>
-          <button class="btn btn-primary" (click)="openAdd()" aria-label="Add new item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
-              <path d="M12 5v14M5 12h14"/>
+        </div>
+
+        <!-- Window controls -->
+        <div class="window-controls" role="toolbar" aria-label="Window controls">
+          <button class="wc-btn" (click)="minimize()" aria-label="Minimize">
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M4 12h16"/>
             </svg>
-            Add Item
+          </button>
+          <button class="wc-btn" (click)="toggleMaximize()" [attr.aria-label]="isMaximized() ? 'Restore' : 'Maximize'">
+            @if (isMaximized()) {
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="6" width="13" height="13" rx="1"/>
+                <path d="M6 6V4a1 1 0 0 1 1-1h13a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-2" stroke-linecap="round"/>
+              </svg>
+            } @else {
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="1"/>
+              </svg>
+            }
+          </button>
+          <button class="wc-btn wc-close" (click)="close()" aria-label="Close">
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M5 5l14 14M19 5L5 19"/>
+            </svg>
           </button>
         </div>
       </header>
@@ -83,6 +90,11 @@ import { UpdateService } from '../shared/services/update.service';
                       <circle cx="12" cy="12" r="10"/>
                       <line x1="2" y1="12" x2="22" y2="12"/>
                       <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                  } @else if (item.type === 'run') {
+                    <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="4 17 10 11 4 5"/>
+                      <line x1="12" y1="19" x2="20" y2="19"/>
                     </svg>
                   } @else {
                     <span class="type-abbr">{{ typeAbbr(item.type) }}</span>
@@ -131,6 +143,28 @@ import { UpdateService } from '../shared/services/update.service';
           </div>
         }
       </main>
+
+      <!-- Footer -->
+      <footer class="bottombar">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            class="filter-input"
+            type="text"
+            placeholder="Filter items…"
+            [value]="filterQuery()"
+            (input)="filterQuery.set($any($event.target).value)"
+            aria-label="Filter items"
+          />
+        </div>
+        <button class="btn-icon btn-icon-primary" (click)="openAdd()" aria-label="Add new item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+        </button>
+      </footer>
 
       <!-- Update notification bar -->
       @if (updateService.pendingUpdate(); as update) {
@@ -193,32 +227,33 @@ import { UpdateService } from '../shared/services/update.service';
     .topbar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 0 14px;
-      height: 58px;
+      padding: 0 0 0 14px;
+      height: 42px;
       background: #181818;
       border-bottom: 1px solid #2a2a2a;
       flex-shrink: 0;
+      user-select: none;
     }
 
     .topbar-brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       font-weight: 700;
-      font-size: 15px;
+      font-size: 13px;
       color: var(--text-primary);
     }
 
     .brand-icon {
-      font-size: 20px;
+      font-size: 18px;
       color: var(--accent);
     }
 
     .topbar-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      margin-left: auto;
     }
 
     .search-wrap {
@@ -237,8 +272,8 @@ import { UpdateService } from '../shared/services/update.service';
     }
 
     .filter-input {
-      width: 200px;
-      padding: 6px 12px 6px 30px;
+      width: 180px;
+      padding: 5px 10px 5px 28px;
       background: #282828;
       border: 1px solid #3e3e3e;
       border-radius: 6px;
@@ -251,6 +286,21 @@ import { UpdateService } from '../shared/services/update.service';
       &::placeholder { color: var(--text-dim); }
       &:focus { border-color: var(--accent); }
     }
+
+    /* Footer */
+    .bottombar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 8px 0 14px;
+      height: 48px;
+      background: #181818;
+      border-top: 1px solid #2a2a2a;
+      flex-shrink: 0;
+    }
+
+    .bottombar .search-wrap { flex: 1; }
+    .bottombar .filter-input { width: 100%; }
 
     /* Item list */
     .item-list-wrap {
@@ -404,6 +454,42 @@ import { UpdateService } from '../shared/services/update.service';
       gap: 8px;
     }
 
+    /* Window controls */
+    .window-controls {
+      display: flex;
+      align-items: stretch;
+      height: 100%;
+      margin-left: 6px;
+      flex-shrink: 0;
+    }
+
+    .wc-btn {
+      width: 46px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      color: #888;
+      cursor: default;
+      transition: background 0.1s, color 0.1s;
+      padding: 0;
+      -webkit-app-region: no-drag;
+
+      &:hover {
+        background: rgba(255,255,255,0.08);
+        color: #e0e0e0;
+      }
+
+      &:active { background: rgba(255,255,255,0.04); }
+    }
+
+    .wc-close:hover {
+      background: #c42b1c !important;
+      color: #fff !important;
+    }
+
     /* Delete confirmation bar */
     .delete-bar {
       position: fixed;
@@ -434,6 +520,7 @@ export class EditComponent {
   private readonly prefsService = inject(PreferencesService);
   protected readonly updateService = inject(UpdateService);
   protected readonly icons = this.itemsService.icons;
+  private readonly tauriWindow = getCurrentWindow();
 
   readonly loading = signal(true);
   readonly filterQuery = signal('');
@@ -441,6 +528,7 @@ export class EditComponent {
   readonly editingItem = signal<ShelfItem | null>(null);
   readonly showPrefs = signal(false);
   readonly pendingDelete = signal<ShelfItem | null>(null);
+  readonly isMaximized = signal(false);
 
   readonly filteredItems = computed(() => {
     const q = this.filterQuery().toLowerCase();
@@ -456,7 +544,18 @@ export class EditComponent {
       await Promise.all([this.itemsService.load(), this.prefsService.load()]);
       this.loading.set(false);
     });
+
+    afterNextRender(async () => {
+      this.isMaximized.set(await this.tauriWindow.isMaximized());
+      await this.tauriWindow.onResized(async () => {
+        this.isMaximized.set(await this.tauriWindow.isMaximized());
+      });
+    });
   }
+
+  protected minimize(): void { this.tauriWindow.minimize(); }
+  protected toggleMaximize(): void { this.tauriWindow.toggleMaximize(); }
+  protected close(): void { this.tauriWindow.close(); }
 
   protected openAdd(): void {
     this.editingItem.set(null);

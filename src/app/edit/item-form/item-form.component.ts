@@ -40,27 +40,38 @@ import { ItemType, ITEM_TYPE_LABELS, ShelfItem } from '../../shared/models/shelf
               }
             </div>
 
-            <!-- Path / URL -->
+            <!-- Path / URL / Command(s) -->
             <div class="field">
-              <label for="path">{{ isUrlType() ? 'URL' : 'Path' }}</label>
+              <label for="path">{{ isUrlType() ? 'URL' : isRunType() ? 'Command(s)' : 'Path' }}</label>
               <div class="path-row">
-                <input
-                  id="path"
-                  class="input"
-                  type="text"
-                  formControlName="path"
-                  [placeholder]="isUrlType() ? 'https://...' : 'C:/path/to/...'"
-                />
-                @if (!isUrlType()) {
-                  <button
-                    type="button"
-                    class="btn btn-ghost browse-btn"
-                    (click)="browse()"
-                  >Browse</button>
+                @if (isRunType()) {
+                  <textarea
+                    id="path"
+                    class="input cmd-input"
+                    formControlName="path"
+                    placeholder="npm start&#10;echo Done"
+                    rows="4"
+                    spellcheck="false"
+                  ></textarea>
+                } @else {
+                  <input
+                    id="path"
+                    class="input"
+                    type="text"
+                    formControlName="path"
+                    [placeholder]="isUrlType() ? 'https://...' : 'C:/path/to/...'"
+                  />
+                  @if (!isUrlType()) {
+                    <button
+                      type="button"
+                      class="btn btn-ghost browse-btn"
+                      (click)="browse()"
+                    >Browse</button>
+                  }
                 }
               </div>
               @if (form.controls.path.invalid && form.controls.path.touched) {
-                <span class="field-error">{{ isUrlType() ? 'URL' : 'Path' }} is required</span>
+                <span class="field-error">{{ isUrlType() ? 'URL' : isRunType() ? 'Command(s)' : 'Path' }} is required</span>
               }
             </div>
 
@@ -143,6 +154,14 @@ import { ItemType, ITEM_TYPE_LABELS, ShelfItem } from '../../shared/models/shelf
       &::placeholder { color: var(--text-dim); }
     }
 
+    .cmd-input {
+      resize: vertical;
+      min-height: 80px;
+      font-family: 'Consolas', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
     .error-msg {
       font-size: 12px;
       color: var(--danger);
@@ -178,6 +197,8 @@ export class ItemFormComponent implements OnInit {
     const t = this.form.controls.type.value;
     return t === 'website' || t === 'youtube';
   };
+
+  readonly isRunType = () => this.form.controls.type.value === 'run';
 
   ngOnInit(): void {
     const item = this.editItem();

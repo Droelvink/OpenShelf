@@ -25,7 +25,6 @@ export class ItemsService {
   async update(item: ShelfItem): Promise<void> {
     await invoke<void>('update_item', { item });
     this._items.update(items => items.map(i => (i.id === item.id ? item : i)));
-    // Clear cached icon so it re-fetches if the path changed
     this._icons.update(m => { const next = new Map(m); next.delete(item.id); return next; });
     void this.loadIconsForItems([item]);
   }
@@ -38,17 +37,39 @@ export class ItemsService {
 
   private async loadIconsForItems(items: ShelfItem[]): Promise<void> {
     const existing = this._icons();
-    const toLoad = items.filter(
-      item => (item.type === 'folder' || item.type === 'file') && !existing.has(item.id),
-    );
+    const toLoad = items.filter(item => !existing.has(item.id));
+
+    for (const item of toLoad) {
+      const urlIcon = this.deriveUrlIcon(item);
+      if (urlIcon) {
+        this._icons.update(m => { const next = new Map(m); next.set(item.id, urlIcon); return next; });
+      }
+    }
 
     await Promise.all(
-      toLoad.map(async item => {
-        const icon = await invoke<string | null>('get_icon', { path: item.path });
-        if (icon) {
-          this._icons.update(m => { const next = new Map(m); next.set(item.id, icon); return next; });
-        }
-      }),
+      toLoad
+        .filter(item => item.type === 'folder' || item.type === 'file')
+        .map(async item => {
+          const icon = await invoke<string | null>('get_icon', { path: item.path });
+          if (icon) {
+            this._icons.update(m => { const next = new Map(m); next.set(item.id, icon); return next; });
+          }
+        }),
     );
+  }
+
+  private deriveUrlIcon(item: ShelfItem): string | null {
+    if (item.type === 'youtube') {
+      const match = item.path.match(/[?&]v=([^&#]+)/) ?? item.path.match(/youtu\.be\/([^?&#]+)/);
+      if (match) return `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg`;
+      return `https://www.google.com/s2/favicons?sz=64&domain=youtube.com`;
+    }
+    if (item.type === 'website') {
+      try {
+        const { hostname } = new URL(item.path);
+        return `https://www.google.com/s2/favicons?sz=64&domain=${hostname}`;
+      } catch { return null; }
+    }
+    return null;
   }
 }

@@ -66,6 +66,40 @@ const NO_RESULTS_H = 56;
               <span class="badge" aria-hidden="true">
                 @if (icons().get(item.id); as iconSrc) {
                   <img class="item-icon" [src]="iconSrc" alt="" />
+                  <span class="type-pip" aria-hidden="true">
+                    @switch (item.type) {
+                      @case ('folder') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                      }
+                      @case ('file') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                          <polyline points="13 2 13 9 20 9"/>
+                        </svg>
+                      }
+                      @case ('youtube') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="2" y="7" width="20" height="15" rx="2" ry="2"/>
+                          <polygon fill="currentColor" stroke="none" points="10 12 10 17 15 14.5"/>
+                        </svg>
+                      }
+                      @case ('website') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"/>
+                          <line x1="2" y1="12" x2="22" y2="12"/>
+                          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                      }
+                      @case ('run') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="4 17 10 11 4 5"/>
+                          <line x1="12" y1="19" x2="20" y2="19"/>
+                        </svg>
+                      }
+                    }
+                  </span>
                 } @else {
                   <span class="badge-svg" [style.color]="badgeFg(item.type)">
                     @switch (item.type) {
@@ -93,6 +127,46 @@ const NO_RESULTS_H = 56;
                           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
                         </svg>
                       }
+                      @case ('run') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="4 17 10 11 4 5"/>
+                          <line x1="12" y1="19" x2="20" y2="19"/>
+                        </svg>
+                      }
+                    }
+                  </span>
+                  <span class="type-pip" aria-hidden="true">
+                    @switch (item.type) {
+                      @case ('folder') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                      }
+                      @case ('file') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                          <polyline points="13 2 13 9 20 9"/>
+                        </svg>
+                      }
+                      @case ('youtube') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="2" y="7" width="20" height="15" rx="2" ry="2"/>
+                          <polygon fill="currentColor" stroke="none" points="10 12 10 17 15 14.5"/>
+                        </svg>
+                      }
+                      @case ('website') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"/>
+                          <line x1="2" y1="12" x2="22" y2="12"/>
+                          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                      }
+                      @case ('run') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="4 17 10 11 4 5"/>
+                          <line x1="12" y1="19" x2="20" y2="19"/>
+                        </svg>
+                      }
                     }
                   </span>
                 }
@@ -101,7 +175,13 @@ const NO_RESULTS_H = 56;
                 <span class="name">{{ item.name }}</span>
                 <span class="path">{{ item.path }}</span>
               </div>
-              <span class="type-tag" aria-hidden="true">{{ typeLabel(item.type) }}</span>
+              @if (item.tags.length > 0) {
+                <span class="alias-list" aria-hidden="true">
+                  @for (tag of item.tags; track tag) {
+                    <span class="alias-tag">{{ tag }}</span>
+                  }
+                </span>
+              }
             </li>
           }
         </ul>
@@ -190,6 +270,7 @@ const NO_RESULTS_H = 56;
     }
 
     .badge {
+      position: relative;
       width: 36px;
       height: 36px;
       border-radius: 4px;
@@ -198,13 +279,33 @@ const NO_RESULTS_H = 56;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      overflow: hidden;
+      overflow: visible;
+    }
+
+    .type-pip {
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      width: 15px;
+      height: 15px;
+      border-radius: 4px;
+      border: 1.5px solid #181818;
+      background: #3a3a3a;
+      color: #c0c0c0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      svg {
+        width: 9px;
+        height: 9px;
+      }
     }
 
     .item-icon {
       width: 36px;
       height: 36px;
-      object-fit: contain;
+      object-fit: cover;
       display: block;
       border-radius: 4px;
     }
@@ -247,14 +348,25 @@ const NO_RESULTS_H = 56;
       text-overflow: ellipsis;
     }
 
-    .type-tag {
+    .alias-list {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 4px;
+      flex-shrink: 0;
+      max-width: 220px;
+      overflow: hidden;
+    }
+
+    .alias-tag {
       font-size: 11px;
       font-weight: 500;
-      padding: 3px 9px;
-      background: #3e3e3e;
-      color: #b3b3b3;
+      padding: 2px 8px;
+      background: #2a2a2a;
+      color: #888;
       border-radius: 4px;
-      flex-shrink: 0;
+      white-space: nowrap;
+      border: 1px solid #3a3a3a;
     }
 
     .empty {
